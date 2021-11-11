@@ -1,0 +1,7 @@
+@import url(antd/dist/antd.min.css);
+
+.flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; 
+}
