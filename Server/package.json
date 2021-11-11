@@ -1,0 +1,17 @@
+{
+  "name": "money_goal_api",
+  "version": "1.0.0",
+  "description": "money goal api is api for money goal application built in antd.js",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "author": "Hasnat Suleman",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.14",
+    "uuid": "^8.3.2"
+  }
+}
