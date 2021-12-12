@@ -13,11 +13,11 @@ app.use(bodyParser.json());
 
 //creaete connection to database with root@hasnat@localhost with mysql pool
 let connection = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: 'hasnat',
-    database: 'moneyg',
+    host: '172.17.0.1',
     port: 3306,
+    user: 'hasnat',
+    password: 'root',
+    database: 'moneyg',
     connectionLimit: 10,
 });
 
@@ -37,7 +37,8 @@ app.use(function (req, res, next) {
 
 
 app.get("/", (req, res) => {
-    res.send("Money Goal Api Is Working Fine");
+    if(connection) res.send("GOOD");
+    else res.sendStatus(500);
 });
 
 // Auth
