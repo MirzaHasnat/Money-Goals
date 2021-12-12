@@ -51,92 +51,112 @@ app.post("/auth/login",(req, res) => {
         if (err) throw err;
         console.log(req.body)
         if (rows.length > 0) {
-            res.send(JSON.stringify({
-                "status": true,
-                "data": rows[0]
-            }));
+            res.send(rsp(true,"",rows[0]));
 
         } else {
-            res.send(JSON.stringify({
-                "status": false,
-                "message": "User Not Found"
-            }));
+            res.send(rsp(false,"User Not Found."));
         }
     });
 });
 
+
+// User Registration
 app.post("/auth/register", [checkEmail], (req, res) => {
     let username = req.body.username;
     let email = req.body.email;
     let password = req.body.password;
 
     if (username && email && password) {
+        
         // encrypt username+password into sha256
         let hash = crypto.createHash('sha256');
+
         hash.update(username + password + email);
+
         let token = hash.digest('hex');
 
         let sql = "INSERT INTO users (id,username,email,password,token) VALUES (?,?,?,?,?)";
 
         connection.query(sql, [randomid(10),username, email, password, token], (err, results) => {
             if (err) throw err;
-
-            res.send({
-                "status": true,
-                "message": "User Created Successfully"
-            });
+            res.send(rsp(true,"User Created Successfully Please goto /login to login."));
         });
 
     } else {
-        res.send({
-            "status": false,
-            "message": "Please Fill All Fields"
-        });
+        res.send(rsp(false,"Please Fill All Required Fields And Try Again."));
     }
 })
 
 
-app.post("/goals/add", (req, res) => {
+
+// Goals
+app.get("/goals",isAuthoried,(req,res)=>{
+    
+    connection.query("SELECT * FROM goals", (err,data)=>{
+
+        if (err) throw err;
+        res.send(rsp(true,"",data)) 
+    })
+})
+
+
+app.post("/goals", (req, res) => {
     let goal = req.body.goalname;
     let amount = req.body.goalamount;
     let date = req.body.daterange;
 
     // connection.query("SELECT * FROM users WHERE token = ?", [token], (err, results) => {
     //     if (err) throw err;
-
         if (goal && amount && date) {
             let sql = "INSERT INTO goals (id,goal,amount,goalstartdate,goalenddate) VALUES (?,?,?,?,?)";
 
             connection.query(sql, [randomid(16), goal, amount, date], (err, results) => {
                 if (err) throw err;
 
-                res.send({
-                    "status": true,
-                    "message": "Goal Added Successfully"
-                });
+                res.send(rsp(true,"Goal Added Successfully."));
             });
         } else {
-            res.send({
-                "status": false,
-                "message": "User Not Found"
-            });
+            res.send(rsp(false,"Please Fill The Required Fields."));
         }
     // });
 });
 
 
 // Middlewares and other functions
+
+// Check If The User is Logged In
+function isAuthoried(req,res,next){
+    
+    let token = req.headers.token
+    console.log(token);
+
+    connection.query("SELECT * FROM users WHERE token=?",[token],(err,results)=>{
+
+        if (err) throw err;
+        if (results.length<1) res.sendStatus(401);
+        else next();
+    })
+}
+
 // check if email is already exist
 function checkEmail(req, res, next) {
+    
     let email = req.body.email;
 
     connection.query("SELECT * FROM users WHERE email = ?", [email], (err, results) => {
+    
         if (err) throw err;
-
         if (results.length > 0) res.send({"status": false, "message": "Email Already Exist"});
         else next();
 
     });
+}
+
+// For Response MSG Generation
+function rsp(status,msg="",data={}){
+    
+    return {"status":status,"message":msg,"data":data }
+
 }
 
 // create a function to generate random 16 byte uuid using crypto
