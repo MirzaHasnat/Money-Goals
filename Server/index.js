@@ -90,35 +90,51 @@ app.post("/auth/register", [checkEmail], (req, res) => {
 
 
 // Goals
-app.get("/goals",isAuthoried,(req,res)=>{
+app.get("/goals",[isAuthoried,getUserId],(req,res)=>{
     
-    connection.query("SELECT * FROM goals", (err,data)=>{
+    connection.query("SELECT * FROM goals WHERE user_token=?",[res.locals.userid], (err,data)=>{
 
         if (err) throw err;
         res.send(rsp(true,"",data)) 
     })
 })
 
+app.get("/goals/:id",[isAuthoried,getUserId],(req,res)=>{
 
-app.post("/goals", (req, res) => {
+    connection.query("SELECT * FROM goals WHERE id=? and user_token=?",[req.params.id,res.locals.userid],(err,data)=>{
+        
+        if (err) throw err;        
+        if(data.length>0) res.send(rsp(true,"",data));
+        else res.send(rsp(false,"Goal Not Found"));
+    
+    })
+
+})
+
+app.post("/goals", [isAuthoried,getUserId] , (req, res) => {
     let goal = req.body.goalname;
+    let goalsdate = req.body.goalstartdate;
+    let goaledate = req.body.goalenddate || new Date();
     let amount = req.body.goalamount;
-    let date = req.body.daterange;
+    let userid = res.locals.userid;
 
-    // connection.query("SELECT * FROM users WHERE token = ?", [token], (err, results) => {
-    //     if (err) throw err;
-        if (goal && amount && date) {
-            let sql = "INSERT INTO goals (id,goal,amount,goalstartdate,goalenddate) VALUES (?,?,?,?,?)";
+    if (goal && amount && goaledate && goalsdate) {
+        
+        let sql = "INSERT INTO goals (id,goal_name,goal_amount,goal_start_date,goal_end_date,user_token) VALUES (?,?,?,?,?,?)";
+        
+        connection.query(sql, [randomid(16), goal, amount, goalsdate, goaledate,userid], (err, results) => {
+            
+            if (err) throw err;
+            res.send(rsp(true,"Goal Added Successfully."));
+        
+        });
+    
+    } else {
+        
+        res.send(rsp(false,"Please Fill The Required Fields."));
+    
+    }
 
-            connection.query(sql, [randomid(16), goal, amount, date], (err, results) => {
-                if (err) throw err;
-
-                res.send(rsp(true,"Goal Added Successfully."));
-            });
-        } else {
-            res.send(rsp(false,"Please Fill The Required Fields."));
-        }
-    // });
 });
 
 
@@ -135,6 +151,20 @@ function isAuthoried(req,res,next){
         if (err) throw err;
         if (results.length<1) res.sendStatus(401);
         else next();
+    })
+}
+
+// Getting User Id
+function getUserId(req,res,next){
+    let token = req.headers.token;
+
+    connection.query("SELECT id FROM users WHERE token=?",[token],(err,user)=>{
+        if(user.length>0){
+            res.locals.userid = user[0].id;
+            next();
+        }else{
+            res.send(rsp(false,"Invalid Token"));
+        }
     })
 }
 
