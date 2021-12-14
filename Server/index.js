@@ -99,6 +99,8 @@ app.get("/goals",[isAuthoried,getUserId],(req,res)=>{
     })
 })
 
+
+// Get Goals By ID
 app.get("/goals/:id",[isAuthoried,getUserId],(req,res)=>{
 
     connection.query("SELECT * FROM goals WHERE id=? and user_token=?",[req.params.id,res.locals.userid],(err,data)=>{
@@ -111,6 +113,8 @@ app.get("/goals/:id",[isAuthoried,getUserId],(req,res)=>{
 
 })
 
+
+// Insert Goals
 app.post("/goals", [isAuthoried,getUserId] , (req, res) => {
     let goal = req.body.goalname;
     let goalsdate = req.body.goalstartdate;
@@ -133,9 +137,42 @@ app.post("/goals", [isAuthoried,getUserId] , (req, res) => {
         
         res.send(rsp(false,"Please Fill The Required Fields."));
     
-    }
-
+    }   
 });
+
+
+// Delete Goals
+app.delete("/goals/:id",[isAuthoried,getUserId],(req,res)=>{
+    let goalid = req.params.id;
+    let userid = res.locals.userid;
+
+    connection.query("DELETE FROM goals WHERE id=? and user_token=?",[goalid,userid],(err,result)=>{
+        
+        if(result.affectedRows>0) res.send(rsp(true,"Goal Deleted Successfully."));
+        else res.send(rsp(false,"Unable To Delete The Goal Please Try Again Letter."));
+    
+    })
+})
+
+// Update Goals
+app.put("/goals/:goalid",[isAuthoried,getUserId],(req,res)=>{
+    let goal = req.body.goalname;
+    let goalsdate = req.body.goalstartdate;
+    let goaledate = req.body.goalenddate;
+    let amount = req.body.goalamount;
+    let userid = res.locals.userid;
+    let goalid = req.params.goalid;
+
+    connection.query("UPDATE goals SET goal_name=CASE WHEN ? = '' THEN goal_name ELSE ? END , goal_start_date=CASE WHEN ? = '' THEN goal_start_date ELSE ? END , goal_end_date=CASE WHEN ? = '' THEN goal_end_date ELSE ? END , goal_amount=CASE WHEN ? = '' THEN goal_amount ELSE ? END WHERE id=? AND user_token=?",[goal,goal,goalsdate,goalsdate,goaledate,goaledate,amount,amount,goalid,userid],(err,result)=>{
+        
+        if (err) throw err;
+        if (result.affectedRows>0) res.send(rsp(true,"Updated Successfully!"));
+        // else res.send(rsp(false,"Unable To Update The Goal Please Try Again Latter."));
+        else res.send(result)
+    
+    })
+})
+
 
 
 // Middlewares and other functions
@@ -144,7 +181,6 @@ app.post("/goals", [isAuthoried,getUserId] , (req, res) => {
 function isAuthoried(req,res,next){
     
     let token = req.headers.token
-    console.log(token);
 
     connection.query("SELECT * FROM users WHERE token=?",[token],(err,results)=>{
 
