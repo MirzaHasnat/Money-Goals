@@ -168,12 +168,74 @@ app.put("/goals/:goalid",[isAuthoried,getUserId],(req,res)=>{
         if (err) throw err;
         if (result.affectedRows>0) res.send(rsp(true,"Updated Successfully!"));
         // else res.send(rsp(false,"Unable To Update The Goal Please Try Again Latter."));
-        else res.send(result)
+        else res.send(rsp(false,"Unable To Update The Goal Please Try Again Latter."));
     
     })
 })
 
 
+
+// get Goal Entries
+app.get("/goals/:goalid/entries",[isAuthoried,getUserId,isValidGoal],(req,res)=>{
+    let goalid = req.params.goalid;
+
+    connection.query("SELECT * FROM goal_entries WHERE goal_id=? ",[goalid],(err,data)=>{
+        
+        if (err) throw err;
+        if (data.length>0) res.send(rsp(true,"",data));
+        else res.send(rsp(false,"No Entries Found."));
+    
+    })
+})
+
+// create a new goal entry
+app.post("/goals/:goalid/entries",[isAuthoried,getUserId,isValidGoal],(req,res)=>{
+    let goalid = req.params.goalid;
+    let entrydes = req.body.entrydes;
+    let entryamount = req.body.entryamount;
+    let moneytype = req.body.moneytype;
+    
+    if(entrydes && entryamount && moneytype){
+        connection.query("INSERT INTO goal_entries (id,entry_des,entry_amount,money_type,goal_id)VALUES(?,?,?,?,?)",[randomid(8),entrydes,entryamount,moneytype,goalid],(err,result)=>{
+                
+            if (err) throw err;
+            if (result.affectedRows>0) res.send(rsp(true,"Entry Created Successfully."));
+            else res.send(rsp(false,"Unable To Create Entry Please Try Again Latter."));
+            
+        })
+    }else{
+        res.send(rsp(false,"Please Fill The Required Fields."));
+    }
+})
+
+app.delete("/goals/:goalid/entries/:entrieid",[isAuthoried,getUserId,isValidGoal],(req,res)=>{
+    let goalid = req.params.goalid;
+    let entrieid = req.params.entrieid;
+
+    connection.query("DELETE FROM goal_entries WHERE id=? AND goal_id=?",[entrieid,goalid],(err,result)=>{
+        
+        if (err) throw err;
+        if (result.affectedRows>0) res.send(rsp(true,"Entry Deleted Successfully."));
+        else res.send(rsp(false,"Unable To Delete The Entry Please Try Again Latter."));
+    
+    })
+})
+
+app.put("/goals/:goalid/entries/:entrieid",[isAuthoried,getUserId,isValidGoal],(req,res)=>{
+    let goalid = req.params.goalid;
+    let entrieid = req.params.entrieid;
+    let entrydes = req.body.entrydes;
+    let entryamount = req.body.entryamount;
+    let moneytype = req.body.moneytype;
+
+    connection.query("UPDATE goal_entries SET entry_des=CASE WHEN ? = '' THEN entry_des ELSE ? END , entry_amount=CASE WHEN ? = '' THEN entry_amount ELSE ? END , money_type=CASE WHEN ? = '' THEN money_type ELSE ? END WHERE id=? AND goal_id=?",[entrydes,entrydes,entryamount,entryamount,moneytype,moneytype,entrieid,goalid],(err,result)=>{
+        
+        if (err) throw err;
+        if (result.affectedRows>0) res.send(rsp(true,"Entry Updated Successfully."));
+        else res.send(rsp(false,"Unable To Update The Entry Please Try Again Latter."));
+    
+    })
+})
 
 // Middlewares and other functions
 
@@ -201,6 +263,18 @@ function getUserId(req,res,next){
         }else{
             res.send(rsp(false,"Invalid Token"));
         }
+    })
+}
+
+function isValidGoal(req,res,next){
+    let goalid = req.params.goalid;
+    let userid = res.locals.userid;
+
+    connection.query("SELECT * FROM goals WHERE id=? AND user_token=?",[goalid,userid],(err,data)=>{
+        
+        if(data.length>0) next();
+        else res.send(rsp(false,"This Goal Is Not Blongs to You Or Does Not Exist."));
+    
     })
 }
 
