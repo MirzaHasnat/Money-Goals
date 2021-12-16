@@ -26,11 +26,12 @@ app.use(function (req, res, next) {
 
     res.setHeader('Access-Control-Allow-Origin', '*');
 
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
 
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,token');
 
     res.setHeader('Access-Control-Allow-Credentials', true);
+
 
     next();
 });
@@ -117,8 +118,8 @@ app.get("/goals/:id",[isAuthoried,getUserId],(req,res)=>{
 // Insert Goals
 app.post("/goals", [isAuthoried,getUserId] , (req, res) => {
     let goal = req.body.goalname;
-    let goalsdate = req.body.goalstartdate;
-    let goaledate = req.body.goalenddate || new Date();
+    let goalsdate = req.body.goaldate[0];
+    let goaledate = req.body.goaldate[1] || new Date();
     let amount = req.body.goalamount;
     let userid = res.locals.userid;
 
