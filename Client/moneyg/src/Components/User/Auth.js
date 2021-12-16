@@ -2,7 +2,7 @@ import {message} from 'antd';
 
 class Auth {
     constructor () {
-        this.isAuthorized = window.localStorage.getItem('isAuthorized')?true: false;
+        this.isAuthorized = window.localStorage.getItem('isAuthorized') || false;
         this.token = window.localStorage.getItem('token') || '';
         this.apiurl = 'http://localhost:3001/';
     }

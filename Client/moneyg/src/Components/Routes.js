@@ -1,5 +1,5 @@
     import React from 'react';
-    import Auth from './User/Auth';
+    // import Auth from './User/Auth';
     import Error401 from './Error/401';
 
 
@@ -7,9 +7,11 @@
 
 
     export const ProtectedRoute = (props) => {
-        if(Auth.isAuthed()){
+
+        if(window.localStorage.getItem("isAuthorized") === "true"){
             return props.children;
         }else{
             return <Error401 />;
         }
+
     }
