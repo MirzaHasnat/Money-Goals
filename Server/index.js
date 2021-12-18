@@ -93,7 +93,7 @@ app.post("/auth/register", [checkEmail], (req, res) => {
 // Goals
 app.get("/goals",[isAuthoried,getUserId],(req,res)=>{
     
-    connection.query("SELECT * FROM goals WHERE user_token=?",[res.locals.userid], (err,data)=>{
+    connection.query("SELECT goals.*,SUM(goal_entries.entry_amount) AS total_added FROM goals INNER JOIN goal_entries ON goals.id=goal_entries.goal_id WHERE goals.user_token=? GROUP BY goal_entries.goal_id",[res.locals.userid], (err,data)=>{
 
         if (err) throw err;
         res.send(rsp(true,"",data)) 
@@ -121,16 +121,21 @@ app.post("/goals", [isAuthoried,getUserId] , (req, res) => {
     let goalsdate = req.body.goaldate[0];
     let goaledate = req.body.goaldate[1] || new Date();
     let amount = req.body.goalamount;
+    let inamount = req.body.inamount || 0;
     let userid = res.locals.userid;
+    let goalid = randomid(16);
 
     if (goal && amount && goaledate && goalsdate) {
-        
-        let sql = "INSERT INTO goals (id,goal_name,goal_amount,goal_start_date,goal_end_date,user_token) VALUES (?,?,?,?,?,?)";
-        
-        connection.query(sql, [randomid(16), goal, amount, goalsdate, goaledate,userid], (err, results) => {
-            
+                
+        connection.query("INSERT INTO goals (id,goal_name,goal_amount,goal_start_date,goal_end_date,user_token) VALUES (?,?,?,?,?,?)", [goalid, goal, amount, goalsdate, goaledate,userid], (err, results) => {
             if (err) throw err;
-            res.send(rsp(true,"Goal Added Successfully."));
+
+            connection.query("INSERT INTO goal_entries(id,entry_des,entry_amount,money_type,goal_id)VALUES(?,?,?,?,?)",[randomid(8),"INITIAL AMOUNT",inamount,"ADD",goalid],(err,result)=>{
+                
+                if (err) throw err;
+                res.send(rsp(true,"Goal Added Successfully."));
+            
+            })
         
         });
     

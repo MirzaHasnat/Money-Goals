@@ -1,5 +1,5 @@
 import React,{useState} from 'react';
-import { Form, Input, Button, DatePicker, message } from 'antd';
+import { Form, Input, Button, DatePicker, message, InputNumber } from 'antd';
 import Apis from '../Apis';
 
 
@@ -10,10 +10,11 @@ function NewGoalForm(){
     }
     let addNewGoal = (data)=>{
         setBtnloading(true);
-        let request = new Apis("goals/add","POST",data)
-        let test = setTimeout(()=>{request.send()},3000)
-        console.log(test)
-        setBtnloading(false);
+        let request = new Apis("goals","POST",data)
+
+        request.send().then((data)=>{
+            setBtnloading(false);
+        })
 
     }
     return(
@@ -31,12 +32,12 @@ function NewGoalForm(){
             <Input placeholder="Enter Goal Amount" />
         </Form.Item>
 
-        <Form.Item label="Date Range" name="daterange" rules={[{required:true,message:"Please Enter Date Range"}]}>
+        <Form.Item label="Date Range" name="goaldate" rules={[{required:true,message:"Please Enter Date Range"}]}>
             <DatePicker.RangePicker/>
         </Form.Item>
         
         <Form.Item label="Goal Initial Amount" name="inamount">
-            <Input placeholder="Enter Goal Initial Amount" />
+            <InputNumber placeholder="Enter Goal Initial Amount" />
         </Form.Item>
         
         <Form.Item wrapperCol={{span:16,offset:19}}>

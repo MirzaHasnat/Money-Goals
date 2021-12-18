@@ -12,10 +12,11 @@ class API{
     async send(){
         const response = await fetch(this.API_URL,{
             method:this.method,
-            body:JSON.stringify(this.data),
+            headers:{"token":localStorage.getItem("token"),"Content-Type":"application/json"},
+            body: this.method !== "GET" ? JSON.stringify(this.data) : null,
         });
         const data = await response.json();
-        this.generateNotification(data)
+        this.generateNotification(data);
         return data;
     }
 
@@ -25,10 +26,14 @@ class API{
     // 1. status: true or false
     // 2. message: string
     generateNotification(data){
-        if(data.status){
-            message.success(data.message);
-        }else{
-            message.error(data.message);
+        if((data.message).length>0){
+
+            if(data.status){
+                message.success(data.message);
+            }else{
+                message.error(data.message);
+            }
+
         }
     } 
 
