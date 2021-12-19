@@ -152,10 +152,12 @@ app.delete("/goals/:id",[isAuthoried,getUserId],(req,res)=>{
     let goalid = req.params.id;
     let userid = res.locals.userid;
 
-    connection.query("DELETE FROM goals WHERE id=? and user_token=?",[goalid,userid],(err,result)=>{
-        
-        if(result.affectedRows>0) res.send(rsp(true,"Goal Deleted Successfully."));
-        else res.send(rsp(false,"Unable To Delete The Goal Please Try Again Letter."));
+    connection.query("DELETE FROM goals WHERE goals.id=? and goals.user_token=?",[goalid,userid],(err,result)=>{
+        if (err) throw err;
+        connection.query("DELETE FROM goal_entries WHERE goal_id=?",[goalid],(err,result)=>{
+            if(result.affectedRows>0) res.send(rsp(true,"Goal Deleted Successfully."));
+            else res.send(rsp(false,"Unable To Delete The Goal Please Try Again Letter."));
+        })
     
     })
 })

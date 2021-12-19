@@ -60,6 +60,7 @@ function Home() {
                                                 <Button type="dashed" danger prefix={<DeleteFilled/>}>Delete</Button>
                                             </Popconfirm>
                                             <Button type="dashed" primary onClick={()=>{setdrawer(true);setdrawerTitle("Add Money");setwhichdrawer("ADDMONEY");setgoalmoneyid(goal.id)}}>Add Money</Button>
+                                            <Button type="outline" primary onClick={()=>{setdrawer(true);setdrawerTitle("More Details");setwhichdrawer("MOREDETAILS");setgoalmoneyid(goal.id)}}>More Details</Button>
                                         </>
                                         }>
                                         <div align="center">
@@ -79,7 +80,7 @@ function Home() {
         :
         <p align="center">Goals are not loaded properly</p>
         }
-        <Drawer title={drawerTitle} width={500} onClose={()=>{setBtnloading(false);setdrawer(false)}} visible={drawer}  size="medium">
+        <Drawer title={drawerTitle} width={whichdrawer==="MOREDETAILS"?1000:500} onClose={()=>{setBtnloading(false);setdrawer(false)}} visible={drawer}  size={whichdrawer==="MOREDETAILS"?"large":"medium"}>
             {whichdrawer==="SETGOAL" && <NewGoalForm/>}
             {whichdrawer==="ADDMONEY" && <AddMoneyForm goalid={goalmoneyid}/>}
         </Drawer>
