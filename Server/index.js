@@ -93,7 +93,7 @@ app.post("/auth/register", [checkEmail], (req, res) => {
 // Goals
 app.get("/goals",[isAuthoried,getUserId],(req,res)=>{
     
-    connection.query("SELECT goals.*,SUM(goal_entries.entry_amount) AS total_added FROM goals INNER JOIN goal_entries ON goals.id=goal_entries.goal_id WHERE goals.user_token=? GROUP BY goal_entries.goal_id",[res.locals.userid], (err,data)=>{
+    connection.query("SELECT goals.*,SUM(goal_entries.entry_amount) AS total_added,DATEDIFF(goals.goal_end_date,NOW()) as days_left FROM goals INNER JOIN goal_entries ON goals.id=goal_entries.goal_id WHERE goals.user_token=? GROUP BY goal_entries.goal_id",[res.locals.userid], (err,data)=>{
 
         if (err) throw err;
         res.send(rsp(true,"",data)) 
@@ -199,9 +199,10 @@ app.post("/goals/:goalid/entries",[isAuthoried,getUserId,isValidGoal],(req,res)=
     let goalid = req.params.goalid;
     let entrydes = req.body.entrydes;
     let entryamount = req.body.entryamount;
-    let moneytype = req.body.moneytype;
+    let moneytype = "ADD";
+    console.log(req.body.entryamount);
     
-    if(entrydes && entryamount && moneytype){
+    if(entryamount>0){
         connection.query("INSERT INTO goal_entries (id,entry_des,entry_amount,money_type,goal_id)VALUES(?,?,?,?,?)",[randomid(8),entrydes,entryamount,moneytype,goalid],(err,result)=>{
                 
             if (err) throw err;

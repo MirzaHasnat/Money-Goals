@@ -5,6 +5,7 @@ class API{
         this.API_URL = "http://localhost:3001/"+api_path;
         this.method = method;
         this.data = data;
+        this.iserr = false;
 
     }
 
@@ -14,8 +15,12 @@ class API{
             method:this.method,
             headers:{"token":localStorage.getItem("token"),"Content-Type":"application/json"},
             body: this.method !== "GET" ? JSON.stringify(this.data) : null,
+        }).catch(err=>{
+            this.generateNotification({status:false,message:err.message});
+            this.iserr = true;
         });
-        const data = await response.json();
+
+        const data = await response.json() || response.text();
         this.generateNotification(data);
         return data;
     }
