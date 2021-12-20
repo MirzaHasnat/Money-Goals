@@ -6,6 +6,7 @@ import Auth from './Auth'
 
 
 function Login(props) {
+    document.title = "Login | MoneyG";
     let [btnloading,setbtnloadin] = useState(false)
     let history = useNavigate();
     async function login(data){

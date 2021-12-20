@@ -4,8 +4,12 @@ import {DeleteFilled, PlusCircleFilled} from '@ant-design/icons';
 import NewGoalForm from './NewGoalForm';
 import AddMoneyForm from './AddMoneyForm';
 import Apis from '../Apis';
+import MoreDetails from './MoreDetails';
+
 
 function Home() {
+    // Chaning The Titile of the Window
+    document.title = "Dashboard | MoneyG";
     let [btnloading,setBtnloading] = useState(false);
     let [drawer,setdrawer] = useState(false);
     let [drawerTitle,setdrawerTitle] = useState('');
@@ -83,6 +87,7 @@ function Home() {
         <Drawer title={drawerTitle} width={whichdrawer==="MOREDETAILS"?1000:500} onClose={()=>{setBtnloading(false);setdrawer(false)}} visible={drawer}  size={whichdrawer==="MOREDETAILS"?"large":"medium"}>
             {whichdrawer==="SETGOAL" && <NewGoalForm/>}
             {whichdrawer==="ADDMONEY" && <AddMoneyForm goalid={goalmoneyid}/>}
+            {whichdrawer==="MOREDETAILS" && <MoreDetails goalid={goalmoneyid}/>}
         </Drawer>
     </>
   );

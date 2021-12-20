@@ -187,7 +187,7 @@ app.put("/goals/:goalid",[isAuthoried,getUserId],(req,res)=>{
 app.get("/goals/:goalid/entries",[isAuthoried,getUserId,isValidGoal],(req,res)=>{
     let goalid = req.params.goalid;
 
-    connection.query("SELECT * FROM goal_entries WHERE goal_id=? ",[goalid],(err,data)=>{
+    connection.query("SELECT entry_des AS ed,entry_amount AS ea,money_type AS mt FROM goal_entries WHERE goal_id=? ORDER BY added_date DESC ",[goalid],(err,data)=>{
         
         if (err) throw err;
         if (data.length>0) res.send(rsp(true,"",data));

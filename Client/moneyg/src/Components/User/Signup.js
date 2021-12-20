@@ -5,6 +5,7 @@ import Auth from './Auth';
 
 
 function Signup() {
+    document.title = "Sign Up | MoneyG";
     let [btnloading, setBtnloading] = useState(false);
     
     function signup(data) {
